@@ -1,6 +1,12 @@
 name: Haskell CI using Cabal
 
 on:
+  workflow_dispatch:
+    inputs:
+      tests:
+        description: 'All'
+        required: false
+        default: 'default'
   push:
     branches: [ "master" ]
   pull_request:
@@ -91,7 +97,7 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo apt-get update
-        sudo apt-get -y install libsodium23 libsodium-dev
+        sudo apt-get -y install libsodium23 libsodium-dev libpcre3 libpcre3-dev
         sudo apt-get -y remove --purge software-properties-common
         sudo apt-get -y autoremove
 
@@ -179,9 +185,25 @@ jobs:
           cabal test cardano-addresses-cli
         fi
 
-    - name: Upload Windows Artifact
-      uses: actions/upload-artifact@v3
-      if: runner.os == 'Windows'
+    # - name: Upload Windows Artifact
+    #   uses: actions/upload-artifact@v3
+    #   if: runner.os == 'Windows'
+    #   with:
+    #     name: ${{ matrix.os }}-exe-ghc-${{ matrix.ghc }}-${{ github.run_number }}
+    #     path: ${{ steps.cabal-store.outputs.cabal-store }}
+        
+    - name: Upload Linux and mac OS Artificat
+      if: runner.os == 'Linux' || runner.os == 'macOS'
+      uses: actions/upload-artifact@v4
       with:
-        name: ${{ matrix.os }}-exe
-        path: ${{ steps.cabal-store.outputs.cabal-store }}
+        name: ${{ matrix.os }}-binary-ghc-${{ matrix.ghc }}-${{ github.run_number }}
+        path: dist-newstyle/build/x86_64-linux/ghc-*/cardano-addresses-cli-3.12.0/x/cardano-address/build/cardano-address/cardano-address*
+        if-no-files-found: error
+    
+    - name: Upload cardano-address binary (Windows)
+      if: runner.os == 'Windows'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.os }}-exe-ghc-${{ matrix.ghc }}-${{ github.run_number }}
+        path: dist-newstyle/build/x86_64-windows/ghc-*/cardano-addresses-cli-3.12.0/x/cardano-address/build/cardano-address/cardano-address.exe
+        if-no-files-found: error
