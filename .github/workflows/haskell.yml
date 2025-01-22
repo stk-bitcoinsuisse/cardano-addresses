@@ -20,7 +20,7 @@ jobs:
       matrix:
         ghc: ["8.10.7", "9.6.5"]
         # os: [ubuntu-latest, macos-latest, windows-latest]
-        os: [ubuntu-20.04, windows-latest]
+        os: [ubuntu-latest, windows-latest]
     env:
       # we need the LD_LIBRARY_PATH env var here because we ended up installing libsecp256k1 into /usr/local,
       # pkg-config, *does* return the proper location, but the library does not appear to be properly referenced.
